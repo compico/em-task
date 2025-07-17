@@ -30,8 +30,10 @@ func init() {
 				if err != nil {
 					return err
 				}
+				app.logger.Info("Application initialized")
 
 				go func() {
+					app.logger.Info("Starting web server")
 					err := app.server.Start()
 					app.logger.ErrorContext(ctx, "error on start server", "error", err)
 				}()
@@ -40,10 +42,12 @@ func init() {
 				signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 				<-sigCh
 
+				//app.logger.Info("Closing db connection")
 				//err = app.db.Close(ctx)
 				//if err != nil {
 				//	return err
 				//}
+				app.logger.Info("Shutting down web server")
 				return app.server.Stop(ctx)
 			},
 		},
