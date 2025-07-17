@@ -10,7 +10,8 @@ import (
 	"context"
 	"github.com/compico/em-task/internal/pkg/config"
 	"github.com/compico/em-task/internal/pkg/di"
-	"github.com/compico/em-task/internal/pkg/logger"
+	"github.com/compico/em-task/pkg/logger"
+	"github.com/compico/em-task/pkg/postgres"
 	"github.com/compico/em-task/web"
 	"github.com/compico/em-task/web/handlers"
 	"github.com/compico/em-task/web/router"
@@ -18,10 +19,10 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApp(ctx context.Context, filepath string) (*App, error) {
+func InitializeApp(ctx context.Context, filepath string) (*App, func(), error) {
 	configConfig, err := config.NewConfig(filepath)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	httpServer := di.HttpServerConfigProvider(configConfig)
 	slog := di.SlogConfigProvider(configConfig)
@@ -32,15 +33,26 @@ func InitializeApp(ctx context.Context, filepath string) (*App, error) {
 	handler := di.SlogJsonHandlerProvider(writer, handlerOptions)
 	slogLogger := di.SlogProvider(handler)
 	loggerLogger := logger.NewLogger(level, slogLogger)
-	getInfo := handlers.NewGetInfo(loggerLogger)
-	serveMux := router.NewServerMux(getInfo)
+	database := di.DatabaseConfigProvider(configConfig)
+	connectionConfig := di.ConnectionConfigProvider(database)
+	pool, cleanup, err := postgres.NewConnection(ctx, connectionConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	db := postgres.NewDatabase(ctx, pool)
+	healthCheckHandler := handlers.NewHealthCheck(loggerLogger, db)
+	subscriptionHandlers := handlers.NewSubscriptionHandler()
+	serveMux := router.NewServerMux(healthCheckHandler, subscriptionHandlers)
 	server := di.HttpServerProvider(httpServer, loggerLogger, serveMux)
 	webServer := web.NewServer(server)
 	app := &App{
 		server: webServer,
 		logger: loggerLogger,
+		pg:     db,
 	}
-	return app, nil
+	return app, func() {
+		cleanup()
+	}, nil
 }
 
 // wire.go:
@@ -49,5 +61,6 @@ type (
 	App struct {
 		server web.Server
 		logger logger.Logger
+		pg     postgres.DB
 	}
 )

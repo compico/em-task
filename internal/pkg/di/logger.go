@@ -2,8 +2,6 @@ package di
 
 import (
 	"github.com/compico/em-task/internal/pkg/config"
-	"github.com/compico/em-task/internal/pkg/logger"
-	"github.com/google/wire"
 	"io"
 	"log/slog"
 	"os"
@@ -12,18 +10,6 @@ import (
 type SlogReplacerAttribute interface {
 	Replace(groups []string, a slog.Attr) slog.Attr
 }
-
-var LoggerSet = wire.NewSet(
-	SlogConfigProvider,
-	SlogWriterProvider,
-	SlogJsonHandlerOptionsProvider,
-	SlogReplacerAttrProvider,
-	SlogJsonHandlerProvider,
-	SlogProvider,
-	SlogLevelProvider,
-
-	logger.NewLogger,
-)
 
 func SlogProvider(handler slog.Handler) *slog.Logger {
 	return slog.New(handler)

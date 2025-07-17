@@ -8,14 +8,20 @@ type Database interface {
 	GetHost() string
 	GetPort() int
 	GetDatabase() string
+	GetMigrationsDir() string
+	GetMigrationSource() string
+	GetMigrationsTable() string
+	GetDsn() string
 }
 
 type database struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	Database string `yaml:"database"`
+	Username        string `yaml:"username"`
+	Password        string `yaml:"password"`
+	Host            string `yaml:"host"`
+	Port            int    `yaml:"port"`
+	Database        string `yaml:"database"`
+	MigrationsDir   string `yaml:"migrations_dir"`
+	MigrationsTable string `yaml:"migrations_table"`
 }
 
 func (d *database) GetUsername() string {
@@ -36,6 +42,18 @@ func (d *database) GetPort() int {
 
 func (d *database) GetDatabase() string {
 	return d.Database
+}
+
+func (d *database) GetMigrationsDir() string {
+	return d.MigrationsDir
+}
+
+func (d *database) GetMigrationSource() string {
+	return fmt.Sprintf("file://%s", d.MigrationsDir)
+}
+
+func (d *database) GetMigrationsTable() string {
+	return d.MigrationsTable
 }
 
 func (d *database) GetDsn() string {

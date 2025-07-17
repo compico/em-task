@@ -16,6 +16,8 @@ http_server:
 database:
   username: admin
   password: 111111
-  host: postgres
+  host: db
   port: 5432
   database: app
+  migrations_dir: 'migrations'
+  migration_table: 'migrations'
