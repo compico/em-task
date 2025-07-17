@@ -8,11 +8,13 @@ import (
 type Config interface {
 	GetSlogConfig() Slog
 	GetHttpServerConfig() HttpServer
+	GetDatabaseConfig() Database
 }
 
 type config struct {
 	SlogConfig       *slog       `yaml:"slog"`
 	HttpServerConfig *httpServer `yaml:"http_server"`
+	DatabaseConfig   *database   `yaml:"database"`
 }
 
 func NewConfig(configPath string) (Config, error) {
@@ -38,4 +40,8 @@ func (config *config) GetSlogConfig() Slog {
 
 func (config *config) GetHttpServerConfig() HttpServer {
 	return config.HttpServerConfig
+}
+
+func (config *config) GetDatabaseConfig() Database {
+	return config.DatabaseConfig
 }

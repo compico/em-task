@@ -6,15 +6,10 @@ RUN apk add make bash
 
 SHELL ["/bin/bash", "-c"]
 
-RUN go install github.com/air-verse/air@latest && \
-    go install github.com/google/wire/cmd/wire@latest && \
-    go install github.com/a-h/templ/cmd/templ@latest
+COPY go.mod go.sum Makefile ./
 
-COPY go.mod go.sum ./
-
+RUN make download_toolchain
 RUN go mod download -x
-
-COPY . .
 
 RUN make wire
 

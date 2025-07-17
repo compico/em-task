@@ -5,9 +5,9 @@ package http
 
 import (
 	"context"
-	"github.com/compico/em-task/internal/pkg/config"
 	"github.com/compico/em-task/internal/pkg/di"
-	"github.com/compico/em-task/internal/pkg/logger"
+	"github.com/compico/em-task/pkg/logger"
+	"github.com/compico/em-task/pkg/postgres"
 	"github.com/compico/em-task/web"
 	"github.com/google/wire"
 )
@@ -16,17 +16,18 @@ type (
 	App struct {
 		server web.Server
 		logger logger.Logger
+		pg     postgres.DB
 	}
 )
 
 func InitializeApp(
 	ctx context.Context,
 	filepath string,
-) (*App, error) {
+) (*App, func(), error) {
 	panic(wire.Build(
-		config.NewConfig,
-
+		di.BaseSet,
 		di.LoggerSet,
+		di.DatabaseSet,
 		di.HttpServerSet,
 
 		wire.Struct(new(App), "*"),
