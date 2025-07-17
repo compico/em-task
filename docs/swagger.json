@@ -10,7 +10,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "https://em-task.compico.su",
+    "host": "em-task.compico.su",
     "basePath": "/api/v1",
     "paths": {
         "/subscriptions": {

@@ -59,7 +59,7 @@ definitions:
         example: user123
         type: string
     type: object
-host: https://em-task.compico.su
+host: em-task.compico.su
 info:
   contact: {}
   description: API для управления подписками

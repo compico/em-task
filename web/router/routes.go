@@ -11,7 +11,7 @@ import (
 // @version 1.0
 // @description API для управления подписками
 // @termsOfService http://swagger.io/terms/
-// @host https://em-task.compico.su
+// @host em-task.compico.su
 // @BasePath /api/v1
 // @schemes https
 
