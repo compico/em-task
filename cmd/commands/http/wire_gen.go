@@ -32,7 +32,7 @@ func InitializeApp(ctx context.Context, filepath string) (*App, func(), error) {
 	handlerOptions := di.SlogJsonHandlerOptionsProvider(slog, slogReplacerAttribute)
 	handler := di.SlogJsonHandlerProvider(writer, handlerOptions)
 	slogLogger := di.SlogProvider(handler)
-	v := di.LoggerOptionsProvider(slog)
+	v := di.LoggerOptionsProvider()
 	loggerLogger := logger.NewLogger(level, slogLogger, v...)
 	database := di.DatabaseConfigProvider(configConfig)
 	connectionConfig := di.ConnectionConfigProvider(database)
