@@ -5,6 +5,7 @@ package migrate
 
 import (
 	"context"
+	di2 "github.com/compico/em-task/cmd/di"
 	"github.com/compico/em-task/internal/pkg/config"
 	"github.com/compico/em-task/internal/pkg/di"
 	"github.com/compico/em-task/pkg/logger"
@@ -27,7 +28,7 @@ func InitializeMigrator(
 ) (*Migrator, error) {
 	panic(wire.Build(
 		di.BaseSet,
-		di.DatabaseConfigProvider,
+		di2.DatabaseConfigProvider,
 		di.LoggerSet,
 		MigrateProvider,
 

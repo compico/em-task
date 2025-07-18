@@ -8,8 +8,8 @@ package http
 
 import (
 	"context"
+	di2 "github.com/compico/em-task/cmd/di"
 	"github.com/compico/em-task/internal/pkg/config"
-	"github.com/compico/em-task/internal/pkg/di"
 	"github.com/compico/em-task/pkg/logger"
 	"github.com/compico/em-task/pkg/postgres"
 	"github.com/compico/em-task/web"
@@ -24,17 +24,17 @@ func InitializeApp(ctx context.Context, filepath string) (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	httpServer := di.HttpServerConfigProvider(configConfig)
-	slog := di.SlogConfigProvider(configConfig)
-	level := di.SlogLevelProvider(slog)
-	writer := di.SlogWriterProvider()
-	slogReplacerAttribute := di.SlogReplacerAttrProvider()
-	handlerOptions := di.SlogJsonHandlerOptionsProvider(slog, slogReplacerAttribute)
-	handler := di.SlogJsonHandlerProvider(writer, handlerOptions)
-	slogLogger := di.SlogProvider(handler)
+	httpServer := di2.HttpServerConfigProvider(configConfig)
+	slog := di2.SlogConfigProvider(configConfig)
+	level := di2.SlogLevelProvider(slog)
+	writer := di2.SlogWriterProvider()
+	slogReplacerAttribute := di2.SlogReplacerAttrProvider()
+	handlerOptions := di2.SlogJsonHandlerOptionsProvider(slog, slogReplacerAttribute)
+	handler := di2.SlogJsonHandlerProvider(writer, handlerOptions)
+	slogLogger := di2.SlogProvider(handler)
 	loggerLogger := logger.NewLogger(level, slogLogger)
-	database := di.DatabaseConfigProvider(configConfig)
-	connectionConfig := di.ConnectionConfigProvider(database)
+	database := di2.DatabaseConfigProvider(configConfig)
+	connectionConfig := di2.ConnectionConfigProvider(database)
 	pool, cleanup, err := postgres.NewConnection(ctx, connectionConfig)
 	if err != nil {
 		return nil, nil, err
@@ -43,7 +43,7 @@ func InitializeApp(ctx context.Context, filepath string) (*App, func(), error) {
 	healthCheckHandler := handlers.NewHealthCheck(loggerLogger, db)
 	subscriptionHandlers := handlers.NewSubscriptionHandler()
 	serveMux := router.NewServerMux(healthCheckHandler, subscriptionHandlers)
-	server := di.HttpServerProvider(httpServer, loggerLogger, serveMux)
+	server := di2.HttpServerProvider(httpServer, loggerLogger, serveMux)
 	webServer := web.NewServer(server)
 	app := &App{
 		server: webServer,
