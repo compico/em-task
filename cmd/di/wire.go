@@ -38,6 +38,7 @@ var LoggerSet = wire.NewSet(
 	SlogJsonHandlerProvider,
 	SlogProvider,
 	SlogLevelProvider,
+	LoggerOptionsProvider,
 
 	logger.NewLogger,
 )

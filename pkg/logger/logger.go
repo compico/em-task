@@ -3,7 +3,7 @@ package logger
 import (
 	"context"
 	"log"
-	slog2 "log/slog"
+	"log/slog"
 )
 
 // Logger slog wrapper
@@ -21,14 +21,32 @@ type Logger interface {
 
 type logger struct {
 	std  *log.Logger
-	slog *slog2.Logger
+	slog *slog.Logger
 }
 
-func NewLogger(logLevel slog2.Level, slog *slog2.Logger) Logger {
-	return &logger{
-		slog: slog,
-		std:  slog2.NewLogLogger(slog.Handler(), logLevel),
+type OptionFunc func(*logger)
+
+func NewLogger(logLevel slog.Level, s *slog.Logger, opts ...OptionFunc) Logger {
+	l := &logger{
+		slog: s,
+		std:  slog.NewLogLogger(s.Handler(), logLevel),
 	}
+
+	for _, opt := range opts {
+		opt(l)
+	}
+
+	return l
+}
+
+func SetSlogDefault() OptionFunc {
+	return func(l *logger) {
+		l.SetSlogDefault()
+	}
+}
+
+func (l *logger) SetSlogDefault() {
+	slog.SetDefault(l.slog)
 }
 
 func (l *logger) Debug(msg string, args ...any) {

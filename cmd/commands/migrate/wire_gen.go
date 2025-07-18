@@ -8,7 +8,7 @@ package migrate
 
 import (
 	"context"
-	di2 "github.com/compico/em-task/cmd/di"
+	"github.com/compico/em-task/cmd/di"
 	"github.com/compico/em-task/internal/pkg/config"
 	"github.com/compico/em-task/pkg/logger"
 	"github.com/golang-migrate/migrate/v4"
@@ -26,15 +26,16 @@ func InitializeMigrator(ctx context.Context, filepath string) (*Migrator, error)
 	if err != nil {
 		return nil, err
 	}
-	slog := di2.SlogConfigProvider(configConfig)
-	level := di2.SlogLevelProvider(slog)
-	writer := di2.SlogWriterProvider()
-	slogReplacerAttribute := di2.SlogReplacerAttrProvider()
-	handlerOptions := di2.SlogJsonHandlerOptionsProvider(slog, slogReplacerAttribute)
-	handler := di2.SlogJsonHandlerProvider(writer, handlerOptions)
-	slogLogger := di2.SlogProvider(handler)
-	loggerLogger := logger.NewLogger(level, slogLogger)
-	database := di2.DatabaseConfigProvider(configConfig)
+	slog := di.SlogConfigProvider(configConfig)
+	level := di.SlogLevelProvider(slog)
+	writer := di.SlogWriterProvider()
+	slogReplacerAttribute := di.SlogReplacerAttrProvider()
+	handlerOptions := di.SlogJsonHandlerOptionsProvider(slog, slogReplacerAttribute)
+	handler := di.SlogJsonHandlerProvider(writer, handlerOptions)
+	slogLogger := di.SlogProvider(handler)
+	v := di.LoggerOptionsProvider(slog)
+	loggerLogger := logger.NewLogger(level, slogLogger, v...)
+	database := di.DatabaseConfigProvider(configConfig)
 	migrate, err := MigrateProvider(database)
 	if err != nil {
 		return nil, err

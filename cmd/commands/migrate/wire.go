@@ -5,9 +5,8 @@ package migrate
 
 import (
 	"context"
-	di2 "github.com/compico/em-task/cmd/di"
+	"github.com/compico/em-task/cmd/di"
 	"github.com/compico/em-task/internal/pkg/config"
-	"github.com/compico/em-task/internal/pkg/di"
 	"github.com/compico/em-task/pkg/logger"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -28,7 +27,7 @@ func InitializeMigrator(
 ) (*Migrator, error) {
 	panic(wire.Build(
 		di.BaseSet,
-		di2.DatabaseConfigProvider,
+		di.DatabaseConfigProvider,
 		di.LoggerSet,
 		MigrateProvider,
 
