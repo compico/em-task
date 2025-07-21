@@ -8,8 +8,8 @@ package migrate
 
 import (
 	"context"
+	"github.com/compico/em-task/cmd/di"
 	"github.com/compico/em-task/internal/pkg/config"
-	"github.com/compico/em-task/internal/pkg/di"
 	"github.com/compico/em-task/pkg/logger"
 	"github.com/golang-migrate/migrate/v4"
 )
@@ -33,7 +33,8 @@ func InitializeMigrator(ctx context.Context, filepath string) (*Migrator, error)
 	handlerOptions := di.SlogJsonHandlerOptionsProvider(slog, slogReplacerAttribute)
 	handler := di.SlogJsonHandlerProvider(writer, handlerOptions)
 	slogLogger := di.SlogProvider(handler)
-	loggerLogger := logger.NewLogger(level, slogLogger)
+	v := di.LoggerOptionsProvider()
+	loggerLogger := logger.NewLogger(level, slogLogger, v...)
 	database := di.DatabaseConfigProvider(configConfig)
 	migrate, err := MigrateProvider(database)
 	if err != nil {
@@ -57,7 +58,7 @@ type (
 
 func MigrateProvider(dbConfig config.Database) (*migrate.Migrate, error) {
 	return migrate.New(
-		dbConfig.GetMigrationSource(),
+		dbConfig.GetMigrationDir(),
 		dbConfig.GetDsn(),
 	)
 }

@@ -3,7 +3,7 @@ package logger
 import (
 	"context"
 	"log"
-	slog2 "log/slog"
+	"log/slog"
 )
 
 // Logger slog wrapper
@@ -16,19 +16,53 @@ type Logger interface {
 	WarnContext(ctx context.Context, msg string, args ...any)
 	Error(msg string, args ...any)
 	ErrorContext(ctx context.Context, msg string, args ...any)
+	With(args ...any) Logger
+	WithGroup(name string) Logger
 	GetStdLogger() *log.Logger
 }
 
 type logger struct {
-	std  *log.Logger
-	slog *slog2.Logger
+	slog     *slog.Logger
+	logLevel slog.Level
 }
 
-func NewLogger(logLevel slog2.Level, slog *slog2.Logger) Logger {
-	return &logger{
-		slog: slog,
-		std:  slog2.NewLogLogger(slog.Handler(), logLevel),
+type OptionFunc func(*logger)
+
+func NewLogger(logLevel slog.Level, s *slog.Logger, opts ...OptionFunc) Logger {
+	l := &logger{
+		logLevel: logLevel,
+		slog:     s,
 	}
+
+	for _, opt := range opts {
+		opt(l)
+	}
+
+	return l
+}
+
+func SetSlogDefault() OptionFunc {
+	return func(l *logger) {
+		l.SetSlogDefault()
+	}
+}
+
+func (l *logger) With(args ...any) Logger {
+	return &logger{
+		logLevel: l.logLevel,
+		slog:     l.slog.With(args...),
+	}
+}
+
+func (l *logger) WithGroup(name string) Logger {
+	return &logger{
+		logLevel: l.logLevel,
+		slog:     l.slog.WithGroup(name),
+	}
+}
+
+func (l *logger) SetSlogDefault() {
+	slog.SetDefault(l.slog)
 }
 
 func (l *logger) Debug(msg string, args ...any) {
@@ -64,5 +98,5 @@ func (l *logger) ErrorContext(ctx context.Context, msg string, args ...any) {
 }
 
 func (l *logger) GetStdLogger() *log.Logger {
-	return l.std
+	return slog.NewLogLogger(l.slog.Handler(), l.logLevel)
 }

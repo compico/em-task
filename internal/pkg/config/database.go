@@ -8,8 +8,7 @@ type Database interface {
 	GetHost() string
 	GetPort() int
 	GetDatabase() string
-	GetMigrationsDir() string
-	GetMigrationSource() string
+	GetMigrationDir() string
 	GetMigrationsTable() string
 	GetDsn() string
 }
@@ -44,11 +43,7 @@ func (d *database) GetDatabase() string {
 	return d.Database
 }
 
-func (d *database) GetMigrationsDir() string {
-	return d.MigrationsDir
-}
-
-func (d *database) GetMigrationSource() string {
+func (d *database) GetMigrationDir() string {
 	return fmt.Sprintf("file://%s", d.MigrationsDir)
 }
 

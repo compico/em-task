@@ -33,3 +33,6 @@ go.work.sum
 
 # app env
 docker-compose.yml
+
+# air temp dir
+tmp/

@@ -5,7 +5,7 @@ package http
 
 import (
 	"context"
-	"github.com/compico/em-task/internal/pkg/di"
+	"github.com/compico/em-task/cmd/di"
 	"github.com/compico/em-task/pkg/logger"
 	"github.com/compico/em-task/pkg/postgres"
 	"github.com/compico/em-task/web"
@@ -28,6 +28,7 @@ func InitializeApp(
 		di.BaseSet,
 		di.LoggerSet,
 		di.DatabaseSet,
+		di.SubscriptionSet,
 		di.HttpServerSet,
 
 		wire.Struct(new(App), "*"),

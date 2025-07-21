@@ -5,8 +5,8 @@ package migrate
 
 import (
 	"context"
+	"github.com/compico/em-task/cmd/di"
 	"github.com/compico/em-task/internal/pkg/config"
-	"github.com/compico/em-task/internal/pkg/di"
 	"github.com/compico/em-task/pkg/logger"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -37,7 +37,7 @@ func InitializeMigrator(
 
 func MigrateProvider(dbConfig config.Database) (*migrate.Migrate, error) {
 	return migrate.New(
-		dbConfig.GetMigrationSource(),
+		dbConfig.GetMigrationDir(),
 		dbConfig.GetDsn(),
 	)
 }

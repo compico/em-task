@@ -8,8 +8,10 @@ package http
 
 import (
 	"context"
+	"github.com/compico/em-task/cmd/di"
 	"github.com/compico/em-task/internal/pkg/config"
-	"github.com/compico/em-task/internal/pkg/di"
+	"github.com/compico/em-task/internal/pkg/pgrepo"
+	"github.com/compico/em-task/internal/pkg/service"
 	"github.com/compico/em-task/pkg/logger"
 	"github.com/compico/em-task/pkg/postgres"
 	"github.com/compico/em-task/web"
@@ -32,7 +34,8 @@ func InitializeApp(ctx context.Context, filepath string) (*App, func(), error) {
 	handlerOptions := di.SlogJsonHandlerOptionsProvider(slog, slogReplacerAttribute)
 	handler := di.SlogJsonHandlerProvider(writer, handlerOptions)
 	slogLogger := di.SlogProvider(handler)
-	loggerLogger := logger.NewLogger(level, slogLogger)
+	v := di.LoggerOptionsProvider()
+	loggerLogger := logger.NewLogger(level, slogLogger, v...)
 	database := di.DatabaseConfigProvider(configConfig)
 	connectionConfig := di.ConnectionConfigProvider(database)
 	pool, cleanup, err := postgres.NewConnection(ctx, connectionConfig)
@@ -41,8 +44,14 @@ func InitializeApp(ctx context.Context, filepath string) (*App, func(), error) {
 	}
 	db := postgres.NewDatabase(ctx, pool)
 	healthCheckHandler := handlers.NewHealthCheck(loggerLogger, db)
-	subscriptionHandlers := handlers.NewSubscriptionHandler()
-	serveMux := router.NewServerMux(healthCheckHandler, subscriptionHandlers)
+	subscription := pgrepo.NewSubscriptionRepository(db)
+	serviceSubscription := service.NewSubscription(subscription)
+	createSubscriptionHandler := handlers.NewCreateSubscriptionHandler(loggerLogger, serviceSubscription)
+	readSubscriptionHandler := handlers.NewReadSubscriptionHandler(loggerLogger, serviceSubscription)
+	updateSubscriptionHandler := handlers.NewUpdateSubscriptionHandler(loggerLogger, serviceSubscription)
+	deleteSubscriptionHandler := handlers.NewDeleteSubscriptionHandler(loggerLogger, serviceSubscription)
+	listSubscriptionsHandler := handlers.NewListSubscriptionsHandler(loggerLogger, serviceSubscription)
+	serveMux := router.NewServerMux(healthCheckHandler, createSubscriptionHandler, readSubscriptionHandler, updateSubscriptionHandler, deleteSubscriptionHandler, listSubscriptionsHandler)
 	server := di.HttpServerProvider(httpServer, loggerLogger, serveMux)
 	webServer := web.NewServer(server)
 	app := &App{

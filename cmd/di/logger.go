@@ -2,6 +2,7 @@ package di
 
 import (
 	"github.com/compico/em-task/internal/pkg/config"
+	"github.com/compico/em-task/pkg/logger"
 	"io"
 	"log/slog"
 	"os"
@@ -42,4 +43,10 @@ func SlogReplacerAttrProvider() SlogReplacerAttribute {
 
 func SlogLevelProvider(conf config.Slog) slog.Level {
 	return conf.GetLevel()
+}
+
+func LoggerOptionsProvider() []logger.OptionFunc {
+	return []logger.OptionFunc{
+		logger.SetSlogDefault(),
+	}
 }

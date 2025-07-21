@@ -13,12 +13,9 @@ recreate:
 migrate_up:
 	docker-compose exec app /app/tmp/main migrate
 
-run:
-	TZ=UTC go run ./cmd http
-
 .PHONY: docs
 docs:
-	swag init -g web/router/routes.go
+	swag init -g web/router/routes.go --pd
 
 .PHONY: migration help
 migration:
@@ -37,13 +34,12 @@ wire_migrate:
 download_toolchain:
 	go install github.com/air-verse/air@latest
 	go install github.com/google/wire/cmd/wire@latest
-	go install github.com/a-h/templ/cmd/templ@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
-init:
+init: download_toolchain wire docs
 	@test -f ./configs/config.yaml || cp ./configs/config.yaml.dist ./configs/config.yaml
 	@test -f docker-compose.yml || cp docker-compose.yml.dist docker-compose.yml
-	make wire
+
 
 wire: wire_http wire_migrate

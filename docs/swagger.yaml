@@ -1,18 +1,18 @@
 basePath: /api/v1
 definitions:
-  handlers.CreateSubscriptionRequest:
+  CreateSubscriptionRequest:
     properties:
       price:
-        example: 999
+        example: 1299
         type: integer
       service_name:
-        example: Netflix
+        example: Yandex Plus
         type: string
       start_date:
-        example: 01-2006
+        example: 03-2024
         type: string
       user_id:
-        example: user123
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     required:
     - price
@@ -20,43 +20,54 @@ definitions:
     - start_date
     - user_id
     type: object
-  handlers.ErrorResponse:
+  DeleteSubscriptionResponse:
+    properties:
+      id:
+        example: 123
+        type: integer
+    type: object
+  ErrorResponse:
     properties:
       error:
         example: Invalid request
         type: string
     type: object
-  handlers.SubscriptionResponse:
+  SubscriptionResponse:
     properties:
       id:
-        example: 1
+        example: 123
         type: integer
       price:
-        example: 999
+        example: 1899
         type: integer
       service_name:
-        example: Netflix
+        example: Yandex Plus
         type: string
       start_date:
-        example: 01-2006
+        example: 05-2025
         type: string
       user_id:
-        example: user123
+        example: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
         type: string
     type: object
-  handlers.UpdateSubscriptionRequest:
+  SumSubscriptionResponse:
+    properties:
+      sum:
+        type: integer
+    type: object
+  UpdateSubscriptionRequest:
     properties:
       price:
-        example: 999
+        example: 1599
         type: integer
       service_name:
-        example: Netflix
+        example: Yandex Plus
         type: string
       start_date:
-        example: 01-2006
+        example: 07-2024
         type: string
       user_id:
-        example: user123
+        example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
         type: string
     type: object
 host: em-task.compico.su
@@ -71,24 +82,15 @@ paths:
     get:
       consumes:
       - application/json
-      description: Получает список подписок с возможностью фильтрации по различным
-        параметрам
+      description: Получает список подписок
       parameters:
-      - description: 'Фильтр по начальной дате (формат: MM-YYYY)'
+      - description: Страница
         in: query
-        name: from
+        name: page
         type: string
-      - description: 'Фильтр по конечной дате (формат: MM-YYYY)'
+      - description: Элементов на страницу
         in: query
-        name: to
-        type: string
-      - description: Фильтр по ID пользователя
-        in: query
-        name: user_id
-        type: string
-      - description: Фильтр по названию сервиса
-        in: query
-        name: service_name
+        name: per_page
         type: string
       produces:
       - application/json
@@ -97,16 +99,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/handlers.SubscriptionResponse'
+              $ref: '#/definitions/SubscriptionResponse'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
       summary: Получить список подписок
       tags:
       - subscriptions
@@ -120,22 +122,22 @@ paths:
         name: subscription
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateSubscriptionRequest'
+          $ref: '#/definitions/CreateSubscriptionRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/handlers.SubscriptionResponse'
+            $ref: '#/definitions/SubscriptionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
       summary: Создать подписку
       tags:
       - subscriptions
@@ -154,15 +156,17 @@ paths:
       - application/json
       responses:
         "204":
-          description: Подписка успешно удалена
+          description: No Content
+          schema:
+            $ref: '#/definitions/DeleteSubscriptionResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
       summary: Удалить подписку
       tags:
       - subscriptions
@@ -182,15 +186,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.SubscriptionResponse'
+            $ref: '#/definitions/SubscriptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
       summary: Получить подписку
       tags:
       - subscriptions
@@ -209,27 +217,59 @@ paths:
         name: subscription
         required: true
         schema:
-          $ref: '#/definitions/handlers.UpdateSubscriptionRequest'
+          $ref: '#/definitions/UpdateSubscriptionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.SubscriptionResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/SubscriptionResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
       summary: Обновить подписку
+      tags:
+      - subscriptions
+  /subscriptions/sum:
+    get:
+      consumes:
+      - application/json
+      description: Получает сумму цены с возможностью фильтрации по различным параметрам
+      parameters:
+      - description: 'Фильтр по начальной дате (формат: MM-YYYY)'
+        in: query
+        name: from
+        type: string
+      - description: 'Фильтр по конечной дате (формат: MM-YYYY)'
+        in: query
+        name: to
+        type: string
+      - description: Фильтр по ID пользователя (UUID)
+        in: query
+        name: user_id
+        type: string
+      - description: Фильтр по названию сервиса
+        in: query
+        name: service_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SumSubscriptionResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Получить сумму цен подписок
       tags:
       - subscriptions
 schemes:
