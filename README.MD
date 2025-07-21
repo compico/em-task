@@ -54,120 +54,84 @@ make docs
 ```
 .
 ├── cmd                         # Точка входа в приложение
-│     ├── commands                # CLI-команды (http-сервер, миграции)
-│     │     ├── commands.go         # Регистрация команд
-│     │     ├── http/               # HTTP-сервер как команда
-│     │     │     ├── cmd.go
-│     │     │     ├── wire.go         # Wire-описание зависимостей
-│     │     │     └── wire_gen.go     # Сгенерировано Google Wire
-│     │     └── migrate/            # Команда миграций
-│     │         ├── cmd.go
-│     │         ├── wire.go
-│     │         └── wire_gen.go
-│     ├── di/                     # DI-компоненты (логгер, сервер, конфиг)
-│     │     ├── config.go
-│     │     ├── http_server.go
-│     │     ├── logger.go
-│     │     └── wire.go
-│     └── main.go                 # Точка входа при запуске бинарника
+│   ├── commands                # CLI-команды (http-сервер, миграции)
+│   │   ├── commands.go         # Регистрация команд
+│   │   ├── http/               # HTTP-сервер как команда
+│   │   │   ├── cmd.go
+│   │   │   ├── wire.go         # Wire-описание зависимостей
+│   │   │   └── wire_gen.go     # Сгенерировано Google Wire
+│   │   └── migrate/            # Команда миграций
+│   │       ├── cmd.go
+│   │       ├── wire.go
+│   │       └── wire_gen.go
+│   ├── di/                     # DI-компоненты (логгер, сервер, конфиг)
+│   │   ├── config.go
+│   │   ├── http_server.go
+│   │   ├── logger.go
+│   │   └── wire.go
+│   └── main.go                 # Точка входа при запуске бинарника
 ├── configs/
-│     ├── config.yaml             # Основной конфиг
-│     └── config.yaml.dist        # Шаблон конфига
+│   └── config.yaml.dist        # Шаблон конфига
 ├── docker/
-│     └── go/Dockerfile           # Dockerfile для сборки Go-приложения
-├── docker-compose.yml          # Docker-compose для запуска
-├── docker-compose.yml.dist     # Шаблон docker-compose
+│   └── go/
+│       ├── Dockerfile           # Dockerfile для сборки Go-приложения
+        └── Dockerfile.prod      # DockerFile для prod сборки
+├── docker-compose.yml.dist      # Шаблон docker-compose
+├── docker-compose.prod.yml.dist # Шаблон docker-compose для prod окружения
 ├── docs/
-│     ├── docs.go
-│     ├── swagger.json
-│     └── swagger.yaml            # Swagger-описание API
+│   ├── docs.go
+│   ├── swagger.json
+│   └── swagger.yaml            # Swagger-описание API
 ├── go.mod
 ├── go.sum
 ├── internal/
-│     └── pkg/                    # Бизнес-логика
-│         ├── config/             # Работа с конфигами
-│         │     ├── config.go
-│         │     ├── database.go
-│         │     ├── http.go
-│         │     └── slog.go
-│         ├── entity/             # Доменные сущности
-│         │     └── subscription.go
-│         ├── pgrepo/             # Реализация репозиториев на PostgreSQL
-│         │     └── subscription.go
-│         ├── repository/         # Интерфейсы репозиториев
-│         │     └── subscription.go
-│         └── service/            # Сервисная логика
-│             └── subscription.go
+│   └── pkg/                    # Бизнес-логика
+│       ├── config/             # Работа с конфигами
+│       │   ├── config.go
+│       │   ├── database.go
+│       │   ├── http.go
+│       │   └── slog.go
+│       ├── entity/             # Доменные сущности
+│       │   └── subscription.go
+│       ├── filter/             # Фильтры для обработки HTTP input'ов
+│       │   └── subscription.go
+│       ├── pgrepo/             # Реализация репозиториев на PostgreSQL
+│       │   └── subscription.go
+│       ├── query/              # Сущности для формирования запросов в БД
+│       │   └── subscription.go
+│       ├── repository/         # Интерфейсы репозиториев
+│       │   └── subscription.go
+│       └── service/            # Сервисная логика
+│           └── subscription.go
 ├── Makefile                    # Набор команд для разработки
 ├── migrations/                 # SQL-миграции
-│     ├── 000001_create_subscriptions_table.down.sql
-│     └── 000001_create_subscriptions_table.up.sql
+│   ├── 000001_create_subscriptions_table.down.sql
+│   └── 000001_create_subscriptions_table.up.sql
 ├── pkg/
-│     ├── logger/                 # Утилиты логирования
-│     │     └── logger.go
-│     └── postgres/               # Подключение к PostgreSQL
-│         ├── connection.go
-│         └── database.go
+│   ├── logger/                 # Утилиты логирования
+│   │   └── logger.go
+│   └── postgres/               # Подключение к PostgreSQL
+│       ├── connection.go
+│       └── database.go
 ├── README.MD
-└── web/                        # HTTP-слой
-    ├── handlers/              # Обработчики маршрутов
-    │     ├── errors.go
-    │     ├── healthcheck.go
-    │     └── subscriptions.go
-    ├── middleware/            # Middleware (логгирование, JSON)
-    │     ├── content_json.go
-    │     └── set_logger.go
-    ├── router/                # Роутинг
-    │     └── routes.go
-    └── server.go              # Запуск HTTP-сервера
-```
-
-### Создание тестовых подписок
-```sql
-CREATE OR REPLACE FUNCTION generate_fake_subscriptions()
-    RETURNS void AS $$
-DECLARE
-    services TEXT[] := ARRAY[
-        'Yandex Plus',
-        'Kinopoisk',
-        'Netflix',
-        'Yandex Music',
-        'Spotify',
-        'IVI'
-        ];
-    num_users INT := 800;
-    total_rows INT := 1000;
-    user_ids UUID[];
-    i INT;
-    uid UUID;
-    service TEXT;
-    price INT;
-    month INT;
-    day DATE;
-BEGIN
-    -- Генерируем 800 уникальных UUID и сохраняем их в массив
-    FOR i IN 1..num_users LOOP
-            user_ids := array_append(user_ids, gen_random_uuid());
-        END LOOP;
-
-    -- Создаём 1000 случайных подписок
-    FOR i IN 1..total_rows LOOP
-            uid := user_ids[1 + floor(random() * array_length(user_ids, 1))::int];
-            service := services[1 + floor(random() * array_length(services, 1))::int];
-
-            -- Цена от 199 до 899
-            price := 100 * (2 + floor(random() * 8))::int - 1;
-
-            -- Случайный месяц в 2025
-            month := 1 + floor(random() * 12)::int;
-            day := make_date(2025, month, 1);
-
-            INSERT INTO subscriptions (service_name, price, user_id, start_date)
-            VALUES (service, price, uid, day);
-        END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-SELECT generate_fake_subscriptions();
+└── web/                    # HTTP-слой
+├── handlers/               # Обработчики маршрутов
+│   ├── create_subscription.go
+│   ├── delete_subscription.go
+│   ├── errors.go
+│   ├── healthcheck.go
+│   ├── list_subscription.go
+│   ├── read_subscription.go
+│   ├── subscriptions.go
+│   ├── sum_subscription.go
+│   └── update_subscription.go
+├── middleware/             # Middleware
+│   ├── json_response.go
+│   └── with_logger.go
+├── request/                # Структуры для HTTP запросов
+│   ├── create_subscription_request.go
+│   └── update_subscription_request.go
+├── router/                 # Роутинг
+│   └── routes.go
+└── server.go               # HTTP-сервер
 ```
