@@ -37,7 +37,7 @@ func InitializeMigrator(
 
 func MigrateProvider(dbConfig config.Database) (*migrate.Migrate, error) {
 	return migrate.New(
-		dbConfig.GetMigrationSource(),
+		dbConfig.GetMigrationDir(),
 		dbConfig.GetDsn(),
 	)
 }

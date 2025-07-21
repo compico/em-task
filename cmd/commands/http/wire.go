@@ -28,6 +28,7 @@ func InitializeApp(
 		di.BaseSet,
 		di.LoggerSet,
 		di.DatabaseSet,
+		di.SubscriptionSet,
 		di.HttpServerSet,
 
 		wire.Struct(new(App), "*"),

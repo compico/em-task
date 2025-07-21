@@ -18,7 +18,7 @@ const docTemplate = `{
     "paths": {
         "/subscriptions": {
             "get": {
-                "description": "Получает список подписок с возможностью фильтрации по различным параметрам",
+                "description": "Получает список подписок",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,26 +32,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Фильтр по начальной дате (формат: MM-YYYY)",
-                        "name": "from",
+                        "description": "Страница",
+                        "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Фильтр по конечной дате (формат: MM-YYYY)",
-                        "name": "to",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Фильтр по ID пользователя",
-                        "name": "user_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Фильтр по названию сервиса",
-                        "name": "service_name",
+                        "description": "Элементов на страницу",
+                        "name": "per_page",
                         "in": "query"
                     }
                 ],
@@ -61,20 +49,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.SubscriptionResponse"
+                                "$ref": "#/definitions/SubscriptionResponse"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
@@ -98,7 +86,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateSubscriptionRequest"
+                            "$ref": "#/definitions/CreateSubscriptionRequest"
                         }
                     }
                 ],
@@ -106,19 +94,74 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SubscriptionResponse"
+                            "$ref": "#/definitions/SubscriptionResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/sum": {
+            "get": {
+                "description": "Получает сумму цены с возможностью фильтрации по различным параметрам",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Получить сумму цен подписок",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Фильтр по начальной дате (формат: MM-YYYY)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр по конечной дате (формат: MM-YYYY)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр по ID пользователя (UUID)",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр по названию сервиса",
+                        "name": "service_name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SumSubscriptionResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
@@ -150,19 +193,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SubscriptionResponse"
+                            "$ref": "#/definitions/SubscriptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
@@ -193,7 +242,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UpdateSubscriptionRequest"
+                            "$ref": "#/definitions/UpdateSubscriptionRequest"
                         }
                     }
                 ],
@@ -201,25 +250,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SubscriptionResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/SubscriptionResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
@@ -247,18 +290,21 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "Подписка успешно удалена"
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteSubscriptionResponse"
+                        }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
@@ -266,7 +312,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.CreateSubscriptionRequest": {
+        "CreateSubscriptionRequest": {
             "type": "object",
             "required": [
                 "price",
@@ -277,23 +323,32 @@ const docTemplate = `{
             "properties": {
                 "price": {
                     "type": "integer",
-                    "example": 999
+                    "example": 1299
                 },
                 "service_name": {
                     "type": "string",
-                    "example": "Netflix"
+                    "example": "Yandex Plus"
                 },
                 "start_date": {
                     "type": "string",
-                    "example": "01-2006"
+                    "example": "03-2024"
                 },
                 "user_id": {
                     "type": "string",
-                    "example": "user123"
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
-        "handlers.ErrorResponse": {
+        "DeleteSubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 123
+                }
+            }
+        },
+        "ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -302,49 +357,57 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.SubscriptionResponse": {
+        "SubscriptionResponse": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer",
-                    "example": 1
+                    "example": 123
                 },
                 "price": {
                     "type": "integer",
-                    "example": 999
+                    "example": 1899
                 },
                 "service_name": {
                     "type": "string",
-                    "example": "Netflix"
+                    "example": "Yandex Plus"
                 },
                 "start_date": {
                     "type": "string",
-                    "example": "01-2006"
+                    "example": "05-2025"
                 },
                 "user_id": {
                     "type": "string",
-                    "example": "user123"
+                    "example": "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
                 }
             }
         },
-        "handlers.UpdateSubscriptionRequest": {
+        "SumSubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "sum": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateSubscriptionRequest": {
             "type": "object",
             "properties": {
                 "price": {
                     "type": "integer",
-                    "example": 999
+                    "example": 1599
                 },
                 "service_name": {
                     "type": "string",
-                    "example": "Netflix"
+                    "example": "Yandex Plus"
                 },
                 "start_date": {
                     "type": "string",
-                    "example": "01-2006"
+                    "example": "07-2024"
                 },
                 "user_id": {
                     "type": "string",
-                    "example": "user123"
+                    "example": "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
                 }
             }
         }

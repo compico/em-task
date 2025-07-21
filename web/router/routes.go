@@ -3,9 +3,14 @@ package router
 import (
 	_ "github.com/compico/em-task/docs"
 	"github.com/compico/em-task/web/handlers"
+	"github.com/compico/em-task/web/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
 )
+
+type Router struct {
+	serve http.Handler
+}
 
 // @title Subscription API
 // @version 1.0
@@ -16,21 +21,35 @@ import (
 // @schemes https
 
 func NewServerMux(
+	jsonResponseMiddleware *middleware.JsonResponse,
+	withLoggerMiddleware *middleware.WithLogger,
+
 	healthCheckHandler *handlers.HealthCheckHandler,
-	subscriptionHandlers handlers.SubscriptionHandlers,
-) *http.ServeMux {
+	createHandler *handlers.CreateSubscriptionHandler,
+	readHandler *handlers.ReadSubscriptionHandler,
+	updateHandler *handlers.UpdateSubscriptionHandler,
+	deleteHandler *handlers.DeleteSubscriptionHandler,
+	listHandler *handlers.ListSubscriptionsHandler,
+	sumHandler *handlers.SumSubscriptionHandler,
+) *Router {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /api/v1/subscriptions", subscriptionHandlers.SubscriptionsCreateHandler)
-	mux.HandleFunc("GET /api/v1/subscriptions", subscriptionHandlers.SubscriptionsListHandler)
-	mux.HandleFunc("GET /api/v1/subscriptions/{id}", subscriptionHandlers.SubscriptionsReadHandler)
-	mux.HandleFunc("PUT /api/v1/subscriptions/{id}", subscriptionHandlers.SubscriptionsUpdateHandler)
-	mux.HandleFunc("DELETE /api/v1/subscriptions/{id}", subscriptionHandlers.SubscriptionsDeleteHandler)
+	mux.Handle("POST /api/v1/subscriptions", jsonResponseMiddleware.Use(withLoggerMiddleware.Use(createHandler)))
+	mux.Handle("GET /api/v1/subscriptions", jsonResponseMiddleware.Use(withLoggerMiddleware.Use(listHandler)))
+	mux.Handle("GET /api/v1/subscriptions/{id}", jsonResponseMiddleware.Use(withLoggerMiddleware.Use(readHandler)))
+	mux.Handle("PUT /api/v1/subscriptions/{id}", jsonResponseMiddleware.Use(withLoggerMiddleware.Use(updateHandler)))
+	mux.Handle("DELETE /api/v1/subscriptions/{id}", jsonResponseMiddleware.Use(withLoggerMiddleware.Use(deleteHandler)))
+	mux.Handle("GET /api/v1/subscriptions/sum", jsonResponseMiddleware.Use(withLoggerMiddleware.Use(sumHandler)))
 
-	// Swagger endpoint
-	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+	mux.Handle("GET /health", jsonResponseMiddleware.Use(healthCheckHandler))
 
-	mux.Handle("GET /health", healthCheckHandler)
+	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 
-	return mux
+	return &Router{
+		serve: mux,
+	}
+}
+
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	r.serve.ServeHTTP(w, req)
 }

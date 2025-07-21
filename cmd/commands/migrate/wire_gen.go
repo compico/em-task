@@ -33,7 +33,7 @@ func InitializeMigrator(ctx context.Context, filepath string) (*Migrator, error)
 	handlerOptions := di.SlogJsonHandlerOptionsProvider(slog, slogReplacerAttribute)
 	handler := di.SlogJsonHandlerProvider(writer, handlerOptions)
 	slogLogger := di.SlogProvider(handler)
-	v := di.LoggerOptionsProvider(slog)
+	v := di.LoggerOptionsProvider()
 	loggerLogger := logger.NewLogger(level, slogLogger, v...)
 	database := di.DatabaseConfigProvider(configConfig)
 	migrate, err := MigrateProvider(database)
@@ -58,7 +58,7 @@ type (
 
 func MigrateProvider(dbConfig config.Database) (*migrate.Migrate, error) {
 	return migrate.New(
-		dbConfig.GetMigrationSource(),
+		dbConfig.GetMigrationDir(),
 		dbConfig.GetDsn(),
 	)
 }
