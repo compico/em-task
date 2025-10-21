@@ -69,7 +69,7 @@ make docs
 ├── docker/
 │   └── go/
 │       ├── Dockerfile           # Dockerfile для сборки Go-приложения
-        └── Dockerfile.prod      # DockerFile для prod сборки
+|       └── Dockerfile.prod      # DockerFile для prod сборки
 ├── docker-compose.yml.dist      # Шаблон docker-compose
 ├── docker-compose.prod.yml.dist # Шаблон docker-compose для prod окружения
 ├── docs/
@@ -109,23 +109,23 @@ make docs
 │       └── database.go
 ├── README.MD
 └── web/                    # HTTP-слой
-├── handlers/               # Обработчики маршрутов
-│   ├── create_subscription.go
-│   ├── delete_subscription.go
-│   ├── errors.go
-│   ├── healthcheck.go
-│   ├── list_subscription.go
-│   ├── read_subscription.go
-│   ├── subscriptions.go
-│   ├── sum_subscription.go
-│   └── update_subscription.go
-├── middleware/             # Middleware
-│   ├── json_response.go
-│   └── with_logger.go
-├── request/                # Структуры для HTTP запросов
-│   ├── create_subscription_request.go
-│   └── update_subscription_request.go
-├── router/                 # Роутинг
-│   └── routes.go
-└── server.go               # HTTP-сервер
+    ├── handlers/               # Обработчики маршрутов
+    |    ├── create_subscription.go
+    |    ├── delete_subscription.go
+    |    ├── errors.go
+    |    ├── healthcheck.go
+    |    ├── list_subscription.go
+    |    ├── read_subscription.go
+    |    ├── subscriptions.go
+    |    ├── sum_subscription.go
+    |    └── update_subscription.go
+    ├── middleware/             # Middleware
+    │   ├── json_response.go
+    │   └── with_logger.go
+    ├── request/                # Структуры для HTTP запросов
+    │   ├── create_subscription_request.go
+    │   └── update_subscription_request.go
+    ├── router/                 # Роутинг
+    │   └── routes.go
+    └── server.go               # HTTP-сервер
 ```
