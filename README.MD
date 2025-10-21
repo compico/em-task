@@ -1,7 +1,3 @@
-### Ссылки
-Документация:
-  - Swagger: [https://em-task.compico.su/swagger](https://em-task.compico.su/swagger)
-
 ### Комманды
 ---
 
